@@ -1,0 +1,14 @@
+.player-window {
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+}
+
+.player-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 12px 16px;
+  box-sizing: border-box;
+}
