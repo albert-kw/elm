@@ -7,18 +7,33 @@ const Player: FunctionComponent = () => {
   const audioElement = useRef<HTMLMediaElement>(null)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  const [buffered, setBuffered] = useState(0)
+  const [bufferedRanges, setBufferedRanges] = useState<BufferedRange[]>()
 
   useEffect(() => {
     if (audioElement?.current?.src) {
       setDuration(audioElement.current.duration)
-      const buffered = audioElement.current.buffered
-      setBuffered(buffered.end(buffered.length - 1))
-
-      if (audioElement.current.ended) {
-        setIsPlaying(false)
-      }
     }
+    //   const audioBuffered = audioElement.current.buffered
+    //   const bufferedRanges: BufferedRange[] = []
+
+    //   for (let i = 0; i < audioBuffered.length; i++) {
+    //     if (audioBuffered.start(i) && audioBuffered.end(i)) {
+    //       const bufferedRange: BufferedRange = {
+    //         start: audioBuffered.start(i),
+    //         end: audioBuffered.end(i),
+    //       }
+
+    //       bufferedRanges.push(bufferedRange)
+    //     }
+    //   }
+
+    //   setBufferedRanges(bufferedRanges)
+    //   console.log(bufferedRanges)
+
+    //   if (audioElement.current.ended) {
+    //     setIsPlaying(false)
+    //   }
+    // }
   })
 
   const togglePlay = (): void => {
@@ -46,6 +61,26 @@ const Player: FunctionComponent = () => {
   const updateCurrentTime = (e: React.SyntheticEvent<HTMLAudioElement, Event>): void => {
     const target = e.target as HTMLAudioElement
     setCurrentTime(target.currentTime)
+
+    if (audioElement?.current) {
+      const audioBuffered = audioElement.current.buffered
+      const newBufferedRanges: BufferedRange[] = []
+
+      for (let i = 0; i < audioBuffered.length; i++) {
+        const bufferedRange: BufferedRange = {
+          start: audioBuffered.start(i),
+          end: audioBuffered.end(i),
+        }
+
+        newBufferedRanges.push(bufferedRange)
+      }
+  
+      setBufferedRanges(newBufferedRanges)
+
+      if (audioElement.current.ended) {
+        setIsPlaying(false)
+      }
+    }
   }
 
   const handleChangeTime = (e: React.MouseEvent<HTMLDivElement, MouseEvent>): void => {
@@ -66,12 +101,18 @@ const Player: FunctionComponent = () => {
       <div className="player-controls">
         <div className="seeker-bar-container" onMouseDown={handleChangeTime}>
           <div className="seeker-bar">
-            <div
-              className="buffered"
-              style={{
-                width: buffered ? `${(buffered / duration) * 100}%` : '0'
-              }}
-            />
+            {bufferedRanges?.map(range => {
+              return (
+                <div
+                  className="buffered"
+                  style={{
+                    left: `${(range.start / duration) * 100}%`,
+                    right: `calc(100% - ${(range.end / duration) * 100}%)`,
+                  }}
+                />
+              )
+            })}
+            
             <div
               className="progress"
               style={{
