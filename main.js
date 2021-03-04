@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require('electron')
+const server = require('./server/server')
 
 function createWindow () {
   const win = new BrowserWindow({
@@ -11,7 +12,6 @@ function createWindow () {
     autoHideMenuBar: true,
   })
 
-  // win.loadFile('index.html')
   win.loadURL('http://localhost:3000/')
 }
 

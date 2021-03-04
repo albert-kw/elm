@@ -2,7 +2,11 @@ import { useState, FunctionComponent, useRef, useEffect } from 'react';
 import '../styles/player.css';
 import { BufferedRange } from '../types/PlayerTypes';
 
-const Player: FunctionComponent = () => {
+interface PlayerProps {
+  filePath: string
+}
+
+const Player: FunctionComponent<PlayerProps> = ({filePath}) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const audioElement = useRef<HTMLMediaElement>(null)
   const [currentTime, setCurrentTime] = useState(0)
@@ -13,27 +17,6 @@ const Player: FunctionComponent = () => {
     if (audioElement?.current?.src) {
       setDuration(audioElement.current.duration)
     }
-    //   const audioBuffered = audioElement.current.buffered
-    //   const bufferedRanges: BufferedRange[] = []
-
-    //   for (let i = 0; i < audioBuffered.length; i++) {
-    //     if (audioBuffered.start(i) && audioBuffered.end(i)) {
-    //       const bufferedRange: BufferedRange = {
-    //         start: audioBuffered.start(i),
-    //         end: audioBuffered.end(i),
-    //       }
-
-    //       bufferedRanges.push(bufferedRange)
-    //     }
-    //   }
-
-    //   setBufferedRanges(bufferedRanges)
-    //   console.log(bufferedRanges)
-
-    //   if (audioElement.current.ended) {
-    //     setIsPlaying(false)
-    //   }
-    // }
   })
 
   const togglePlay = (): void => {
@@ -96,8 +79,13 @@ const Player: FunctionComponent = () => {
 
   return (
     <div className="player-window">
-      <audio style={{width: '100%'}} controls ref={audioElement} onTimeUpdate={updateCurrentTime} src="http://localhost:3001/stream">
-      </audio>
+      {filePath && (
+        <audio
+          ref={audioElement}
+          onTimeUpdate={updateCurrentTime}
+          src={`http://localhost:3001/stream?path=${filePath}`}
+        />
+      )}
       <div className="player-controls">
         <div className="seeker-bar-container" onMouseDown={handleChangeTime}>
           <div className="seeker-bar">
