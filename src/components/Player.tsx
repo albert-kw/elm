@@ -1,12 +1,13 @@
-import { useState, FunctionComponent, useRef, useEffect } from 'react';
-import '../styles/player.css';
-import { BufferedRange } from '../types/PlayerTypes';
+import React, { useState, FunctionComponent, useRef, useEffect } from 'react';
+import '../styles/player.less';
+import { BufferedRange } from '../types/types';
+import * as uuid from 'uuid'
 
 interface PlayerProps {
-  filePath: string
+  mediaUrl: string
 }
 
-const Player: FunctionComponent<PlayerProps> = ({filePath}) => {
+const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const audioElement = useRef<HTMLMediaElement>(null)
   const [currentTime, setCurrentTime] = useState(0)
@@ -18,6 +19,14 @@ const Player: FunctionComponent<PlayerProps> = ({filePath}) => {
       setDuration(audioElement.current.duration)
     }
   })
+
+  useEffect(() => {
+    if (audioElement?.current?.src) {
+      setDuration(audioElement.current.duration)
+    }
+    setIsPlaying(false)
+    setCurrentTime(0)
+  }, [mediaUrl])
 
   const togglePlay = (): void => {
     if (!audioElement?.current) {
@@ -51,6 +60,7 @@ const Player: FunctionComponent<PlayerProps> = ({filePath}) => {
 
       for (let i = 0; i < audioBuffered.length; i++) {
         const bufferedRange: BufferedRange = {
+          id: uuid.v1(),
           start: audioBuffered.start(i),
           end: audioBuffered.end(i),
         }
@@ -78,12 +88,12 @@ const Player: FunctionComponent<PlayerProps> = ({filePath}) => {
   }
 
   return (
-    <div className="player-window">
-      {filePath && (
+    <>
+      {mediaUrl && (
         <audio
           ref={audioElement}
           onTimeUpdate={updateCurrentTime}
-          src={`http://localhost:3001/stream?path=${filePath}`}
+          src={mediaUrl}
         />
       )}
       <div className="player-controls">
@@ -93,6 +103,7 @@ const Player: FunctionComponent<PlayerProps> = ({filePath}) => {
               return (
                 <div
                   className="buffered"
+                  key={range.id}
                   style={{
                     left: `${(range.start / duration) * 100}%`,
                     right: `calc(100% - ${(range.end / duration) * 100}%)`,
@@ -100,7 +111,6 @@ const Player: FunctionComponent<PlayerProps> = ({filePath}) => {
                 />
               )
             })}
-            
             <div
               className="progress"
               style={{
@@ -108,17 +118,20 @@ const Player: FunctionComponent<PlayerProps> = ({filePath}) => {
               }}
             />
           </div>
+          <div className="pin" style={{
+            left: currentTime ? `calc(${(currentTime / duration) * 100}% - 6px)` : '-6px'
+          }}/>
         </div>
         <div className="control-buttons">
-          <button onClick={togglePlay}>
+          <button disabled={!mediaUrl} onClick={togglePlay}>
             {isPlaying ? 'Pause' : 'Play'}
           </button>
-          <button onClick={stopPlaying}>Stop</button>
-          <button>Previous</button>
-          <button>Next</button>
+          <button disabled={!mediaUrl} onClick={stopPlaying}>Stop</button>
+          <button disabled={!mediaUrl}>Previous</button>
+          <button disabled={!mediaUrl}>Next</button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
