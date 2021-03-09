@@ -19,7 +19,7 @@ function createWindow () {
       preload: path.join(__dirname, "preload.js")
     },
     fullscreen: false,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
   });
 
   const menuTemplate = [
@@ -137,9 +137,10 @@ app.on('activate', () => {
 
 ipcMain.on('select-file', (event, filePath) => {
   try {
-    console.log(filePath)
+    //console.log(filePath)
     if (fs.existsSync(filePath)) {
       fs.readFile(filePath, (error, data) => {
+        // TODO: put this into a function
         // get the extension from the file
         // group 1 := filename
         // group 2 := . (dot)
