@@ -4,7 +4,11 @@ const dataurl = require('dataurl');
 const fs = require('fs');
 const uuid = require('uuid');
 
-let win
+//const supported_format = '/.*\.\(mp3\|flac\|wav\)/i';
+const supported_format = /.*\.(mp3|flac|wav)/;
+const supported_format_types = [ 'mp3', 'flac', 'wav' ];
+
+let win;
 
 function createWindow () {
   win = new BrowserWindow({
@@ -51,7 +55,7 @@ function createWindow () {
             .catch(function(err) {
               console.error(err);
            })
-          } 
+          }
         },
         {
           label: 'Open Folder',
@@ -74,16 +78,16 @@ function createWindow () {
 
                   return;
                 }
-                
+
                 const mediaFilePaths = fileNames
                   .filter(fileName => {
-                    return fileName.match(/.*\.mp3$/)
+                    return fileName.match(supported_format);
                   })
                   .map(fileName => {
                     return {
                       id: uuid.v1(),
                       name: fileName,
-                      path: `${dirPath}\\${fileName}`
+                      path: `${dirPath}/${fileName}`
                     };
                   });
 
@@ -91,9 +95,9 @@ function createWindow () {
               })
             })
             .catch(function(err) {
-              console.error(err)  
+              console.error(err)
            })
-          } 
+          }
         },
       ]
     },
@@ -106,7 +110,7 @@ function createWindow () {
       ]
     }
   ]
-  
+
   const menu = Menu.buildFromTemplate(menuTemplate)
   Menu.setApplicationMenu(menu)
 
@@ -133,9 +137,25 @@ app.on('activate', () => {
 
 ipcMain.on('select-file', (event, filePath) => {
   try {
+    console.log(filePath)
     if (fs.existsSync(filePath)) {
       fs.readFile(filePath, (error, data) => {
-        const dataUrl = dataurl.convert({ data, mimetype: 'audio/mp3' })
+        // get the extension from the file
+        // group 1 := filename
+        // group 2 := . (dot)
+        // group 3 := extension
+        let file_parts = filePath.match(/(.*)(\.)(.*)$/);
+
+        let fileName = file_parts[1];
+        let extension = file_parts[3];
+
+        // match against supported format types
+        //let match_format_type = supported_format_types.
+
+        // set that to a variable `ext`, and throw it at the end of mimetype
+        let supported_format_mime = `audio/${extension}`
+
+        const dataUrl = dataurl.convert({ data, mimetype: supported_format_mime })
         win.webContents.send('data-url', dataUrl);
       })
     } else {
