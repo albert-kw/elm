@@ -4,11 +4,29 @@ const dataurl = require('dataurl');
 const fs = require('fs');
 const uuid = require('uuid');
 
-//const supported_format = '/.*\.\(mp3\|flac\|wav\)/i';
-const supported_format = /.*\.(mp3|flac|wav)/;
-const supported_format_types = [ 'mp3', 'flac', 'wav' ];
+const supported_format_type = [ 'mp3', 'flac', 'wav' ];
+const supported_format_regex = new RegExp (
+    '.*\.('+supported_format_type.join('|')+')$',
+    'i'
+);
+
 
 let win;
+
+/*
+ * Get properties from a filepath
+ * group 1 := filename
+ * group 2 := . (dot)
+ * group 3 := extension
+ */
+function getFileProperties(filePath) {
+    let file_parts = filePath.match(/(.*)(\.)(.*)$/);
+
+    return {
+        name : file_parts[1],
+        extension : file_parts[3]
+    }
+}
 
 function createWindow () {
   win = new BrowserWindow({
@@ -42,6 +60,7 @@ function createWindow () {
               try {
                 if (fs.existsSync(filePath)) {
                   fs.readFile(filePath, (error, data) => {
+                    let extension 
                     const dataUrl = dataurl.convert({ data, mimetype: 'audio/mp3' })
                     win.webContents.send('data-url', dataUrl);
                   })
@@ -81,7 +100,7 @@ function createWindow () {
 
                 const mediaFilePaths = fileNames
                   .filter(fileName => {
-                    return fileName.match(supported_format);
+                    return fileName.match(supported_format_regex);
                   })
                   .map(fileName => {
                     return {
@@ -137,18 +156,10 @@ app.on('activate', () => {
 
 ipcMain.on('select-file', (event, filePath) => {
   try {
-    //console.log(filePath)
     if (fs.existsSync(filePath)) {
       fs.readFile(filePath, (error, data) => {
-        // TODO: put this into a function
-        // get the extension from the file
-        // group 1 := filename
-        // group 2 := . (dot)
-        // group 3 := extension
-        let file_parts = filePath.match(/(.*)(\.)(.*)$/);
 
-        let fileName = file_parts[1];
-        let extension = file_parts[3];
+        let extension = getFileProperties(filePath).extension
 
         // match against supported format types
         //let match_format_type = supported_format_types.
