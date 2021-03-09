@@ -15,44 +15,44 @@ function createWindow () {
       preload: path.join(__dirname, "preload.js")
     },
     fullscreen: false,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
   });
 
   const menuTemplate = [
     {
       label: 'File',
       submenu: [
-        {
-          label: 'Open File',
-          accelerator: 'CmdOrCtrl+O',
-          click() {
-            dialog.showOpenDialog({
-              properties: ['openFile']
-            })
-            .then(function(fileObj) {
-              if (!fileObj.filePaths.length) {
-                console.error('no files selected');
-                return;
-              }
-              const filePath = fileObj.filePaths[0];
-              try {
-                if (fs.existsSync(filePath)) {
-                  fs.readFile(filePath, (error, data) => {
-                    const dataUrl = dataurl.convert({ data, mimetype: 'audio/mp3' })
-                    win.webContents.send('data-url', dataUrl);
-                  })
-                } else {
-                  console.error('file not found');
-                }
-              } catch (err) {
-                console.error(err);
-              }
-            })
-            .catch(function(err) {
-              console.error(err);
-           })
-          } 
-        },
+        // {
+        //   label: 'Open File',
+        //   accelerator: 'CmdOrCtrl+O',
+        //   click() {
+        //     dialog.showOpenDialog({
+        //       properties: ['openFile']
+        //     })
+        //     .then(function(fileObj) {
+        //       if (!fileObj.filePaths.length) {
+        //         console.error('no files selected');
+        //         return;
+        //       }
+        //       const filePath = fileObj.filePaths[0];
+        //       try {
+        //         if (fs.existsSync(filePath)) {
+        //           fs.readFile(filePath, (error, data) => {
+        //             const dataUrl = dataurl.convert({ data, mimetype: 'audio/mp3' })
+        //             win.webContents.send('data-url', dataUrl);
+        //           })
+        //         } else {
+        //           console.error('file not found');
+        //         }
+        //       } catch (err) {
+        //         console.error(err);
+        //       }
+        //     })
+        //     .catch(function(err) {
+        //       console.error(err);
+        //    })
+        //   } 
+        // },
         {
           label: 'Open Folder',
           accelerator: 'CmdOrCtrl+Shift+O',
