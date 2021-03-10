@@ -39,8 +39,19 @@ module.exports = {
       }
     ]
   },
+  node: {
+    __filename: true,
+    __dirname: true
+  },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js']
+    extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+        util: "util",
+        crypto: "crypto-browserify",
+        os: "os-browserify/browser",
+        path: "path-browserify",
+        buffer: "buffer"
+    }
   },
   // add a custom index.html as the template
   plugins: [new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'src', 'index.html') })]

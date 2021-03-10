@@ -3,6 +3,8 @@ import '../styles/player.less';
 import { BufferedRange } from '../types/types';
 import * as uuid from 'uuid'
 
+import Notify from '../components/Notify';
+
 interface PlayerProps {
   mediaUrl: string
 }
@@ -36,8 +38,11 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
     setIsPlaying(!isPlaying)
     if (!isPlaying) {
       audioElement.current.play()
+      Notify("Elm Player", "Playing");
+
     } else {
       audioElement.current.pause()
+      Notify("Elm Player", "Paused");
     }
   }
 
@@ -48,6 +53,7 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
     audioElement.current['pause']()
     audioElement.current['currentTime'] = 0
     setIsPlaying(false)
+    Notify("Elm Player", "Stopped");
   }
 
   const updateCurrentTime = (e: React.SyntheticEvent<HTMLAudioElement, Event>): void => {
