@@ -4,7 +4,29 @@ const dataurl = require('dataurl');
 const fs = require('fs');
 const uuid = require('uuid');
 
-let win
+const supported_format_type = [ 'mp3', 'flac', 'wav' ];
+const supported_format_regex = new RegExp (
+    '.*\.('+supported_format_type.join('|')+')$',
+    'i'
+);
+
+
+let win;
+
+/*
+ * Get properties from a filepath
+ * group 1 := filename
+ * group 2 := . (dot)
+ * group 3 := extension
+ */
+function getFileProperties(filePath) {
+    let file_parts = filePath.match(/(.*)(\.)(.*)$/);
+
+    return {
+        name : file_parts[1],
+        extension : file_parts[3]
+    }
+}
 
 function createWindow () {
   win = new BrowserWindow({
@@ -15,7 +37,7 @@ function createWindow () {
       preload: path.join(__dirname, "preload.js")
     },
     fullscreen: false,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
   });
 
   const menuTemplate = [
@@ -38,6 +60,7 @@ function createWindow () {
               try {
                 if (fs.existsSync(filePath)) {
                   fs.readFile(filePath, (error, data) => {
+                    let extension 
                     const dataUrl = dataurl.convert({ data, mimetype: 'audio/mp3' })
                     win.webContents.send('data-url', dataUrl);
                   })
@@ -51,7 +74,7 @@ function createWindow () {
             .catch(function(err) {
               console.error(err);
            })
-          } 
+          }
         },
         {
           label: 'Open Folder',
@@ -74,16 +97,16 @@ function createWindow () {
 
                   return;
                 }
-                
+
                 const mediaFilePaths = fileNames
                   .filter(fileName => {
-                    return fileName.match(/.*\.mp3$/)
+                    return fileName.match(supported_format_regex);
                   })
                   .map(fileName => {
                     return {
                       id: uuid.v1(),
                       name: fileName,
-                      path: `${dirPath}\\${fileName}`
+                      path: `${dirPath}/${fileName}`
                     };
                   });
 
@@ -91,9 +114,9 @@ function createWindow () {
               })
             })
             .catch(function(err) {
-              console.error(err)  
+              console.error(err)
            })
-          } 
+          }
         },
       ]
     },
@@ -106,7 +129,7 @@ function createWindow () {
       ]
     }
   ]
-  
+
   const menu = Menu.buildFromTemplate(menuTemplate)
   Menu.setApplicationMenu(menu)
 
@@ -135,7 +158,16 @@ ipcMain.on('select-file', (event, filePath) => {
   try {
     if (fs.existsSync(filePath)) {
       fs.readFile(filePath, (error, data) => {
-        const dataUrl = dataurl.convert({ data, mimetype: 'audio/mp3' })
+
+        let extension = getFileProperties(filePath).extension
+
+        // match against supported format types
+        //let match_format_type = supported_format_types.
+
+        // set that to a variable `ext`, and throw it at the end of mimetype
+        let supported_format_mime = `audio/${extension}`
+
+        const dataUrl = dataurl.convert({ data, mimetype: supported_format_mime })
         win.webContents.send('data-url', dataUrl);
       })
     } else {
