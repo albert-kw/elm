@@ -45,13 +45,31 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    /*
+    fallback: {
+      //"util": false,
+      "crypto": false,
+      "os": false,
+      "path": false,
+      //"buffer": false,
+      "stream": false
+      /*
+      "fs": false,
+      "net": false
+    },
+      */
+    /*
     alias: {
         util: "util",
-        crypto: "crypto-browserify",
-        os: "os-browserify/browser",
-        path: "path-browserify",
         buffer: "buffer"
+    /*
+        crypto: "crypto-browserify",
+        //os: "os-browserify/browser",
+        os: "os-browserify",
+        path: "path-browserify",
+        stream: "stream-browserify"
     }
+    */
   },
   // add a custom index.html as the template
   plugins: [new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'src', 'index.html') })]

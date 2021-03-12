@@ -3,7 +3,8 @@ import '../styles/player.less';
 import { BufferedRange } from '../types/types';
 import * as uuid from 'uuid'
 
-import Notify from '../components/Notify';
+//import Notify from '../components/Notify';
+import Snackbar from '@material-ui/core/Snackbar';
 
 interface PlayerProps {
   mediaUrl: string
@@ -15,6 +16,8 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [bufferedRanges, setBufferedRanges] = useState<BufferedRange[]>()
+  const [notif, setNotif] = useState(null);
+  const [openSnack, setOpenSnack] = useState(false);
 
   useEffect(() => {
     if (audioElement?.current?.src) {
@@ -30,6 +33,12 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
     setCurrentTime(0)
   }, [mediaUrl])
 
+    const handleSnackBarClose = (event?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') return;
+
+        setOpenSnack(false);
+    };
+
   const togglePlay = (): void => {
     if (!audioElement?.current) {
       return
@@ -38,11 +47,21 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
     setIsPlaying(!isPlaying)
     if (!isPlaying) {
       audioElement.current.play()
-      Notify("Elm Player", "Playing");
+
+      setNotif({
+        title: "Elm Player",
+        message: "Playing"
+      })
+      setOpenSnack(true);
+
 
     } else {
       audioElement.current.pause()
-      Notify("Elm Player", "Paused");
+      setNotif({
+        title: "Elm Player",
+        message: "Paused"
+      })
+      setOpenSnack(true);
     }
   }
 
@@ -53,7 +72,12 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
     audioElement.current['pause']()
     audioElement.current['currentTime'] = 0
     setIsPlaying(false)
-    Notify("Elm Player", "Stopped");
+
+    setNotif({
+        title: "Elm Player",
+        message: "Stopped"
+    })
+    setOpenSnack(true);
   }
 
   const updateCurrentTime = (e: React.SyntheticEvent<HTMLAudioElement, Event>): void => {
@@ -102,6 +126,18 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
           src={mediaUrl}
         />
       )}
+      { notif && (
+        <div className="notification">
+           <Snackbar open={openSnack}
+                autoHideDuration={3000}
+                onClose={handleSnackBarClose}>
+
+                <div className="notif-message">{notif.message}</div>
+        </Snackbar>
+        {/*<Notify title={notif.title} message={notif.message} /> */}
+        </div>
+      )// && () && (setNotif (null))
+      }
       <div className="player-controls">
         <div className="seeker-bar-container" onMouseDown={handleChangeTime}>
           <div className="seeker-bar">
