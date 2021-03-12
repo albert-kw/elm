@@ -11,8 +11,10 @@ import Snackbar from '@material-ui/core/Snackbar';
 //const notifier = new n.NotificationCenter();
 
 interface NotifyProps {
-  title: string,
+  title: string
   message: string
+  open: boolean
+  onClose: () => void
 }
 
 //function Alert(props: AlertProps) {
@@ -20,24 +22,20 @@ interface NotifyProps {
 //}
 
 //function Notify (title:string, message:string) {
-const Notify: FunctionComponent<NotifyProps> = ({ title, message}) => {
-    const [open, setOpen] = React.useState(false);
+const Notify: FunctionComponent<NotifyProps> = ({ title, message, open, onClose }) => {
 
     //let notifier:any = null;
     //Notification.newInstance({}, (n:any) => notifier = n);
 
-    const handleClick = () => {
-        setOpen(true);
-    };
+    // const handleClick = () => {
+    //     setOpen(true);
+    // };
 
-    const handleClose = (event?: React.SyntheticEvent, reason?: string) => {
-        if (reason === 'clickaway') return;
+    // const handleClose = (event?: React.SyntheticEvent, reason?: string) => {
+    //     if (reason === 'clickaway') return;
 
-        setOpen(false);
-    };
-
-    if (!message) return;
-    handleClick();
+    //     setOpen(false);
+    // };
 
     /*
     notifier.notify( {
@@ -55,15 +53,16 @@ const Notify: FunctionComponent<NotifyProps> = ({ title, message}) => {
 
     return (
         <>
-        <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
-            {/*
-                //<Alert onClose={handleClose} severity="success">
-            */}
-                <div>This is a success message!</div>
-            {/*
-                //</Alert>
-            */}
-        </Snackbar>
+
+            <Snackbar open={open} autoHideDuration={3000} onClose={onClose}>
+                {/*
+                    //<Alert onClose={handleClose} severity="success">
+                */}
+                    <div>This is a success message!</div>
+                {/*
+                    //</Alert>
+                */}
+            </Snackbar>
         </>
     );
 }

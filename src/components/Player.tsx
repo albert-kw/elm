@@ -3,7 +3,7 @@ import '../styles/player.less';
 import { BufferedRange } from '../types/types';
 import * as uuid from 'uuid'
 
-//import Notify from '../components/Notify';
+import Notify from '../components/Notify';
 import Snackbar from '@material-ui/core/Snackbar';
 
 interface PlayerProps {
@@ -33,9 +33,7 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
     setCurrentTime(0)
   }, [mediaUrl])
 
-    const handleSnackBarClose = (event?: React.SyntheticEvent, reason?: string) => {
-        if (reason === 'clickaway') return;
-
+    const handleSnackBarClose = () => {
         setOpenSnack(false);
     };
 
@@ -128,13 +126,13 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
       )}
       { notif && (
         <div className="notification">
-           <Snackbar open={openSnack}
+           {/* <Snackbar open={openSnack}
                 autoHideDuration={3000}
                 onClose={handleSnackBarClose}>
 
                 <div className="notif-message">{notif.message}</div>
-        </Snackbar>
-        {/*<Notify title={notif.title} message={notif.message} /> */}
+        </Snackbar> */}
+        <Notify title={notif.title} message={notif.message} open={openSnack} onClose={handleSnackBarClose}/>
         </div>
       )// && () && (setNotif (null))
       }
