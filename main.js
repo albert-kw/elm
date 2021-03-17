@@ -60,7 +60,7 @@ function createWindow () {
               try {
                 if (fs.existsSync(filePath)) {
                   fs.readFile(filePath, (error, data) => {
-                    let extension 
+                    let extension
                     const dataUrl = dataurl.convert({ data, mimetype: 'audio/mp3' })
                     win.webContents.send('data-url', dataUrl);
                   })
@@ -176,4 +176,48 @@ ipcMain.on('select-file', (event, filePath) => {
   } catch (err) {
     console.error(err)
   }
+});
+
+
+ipcMain.on('select-dir', (event, dirPath) => {
+  try {
+
+    console.log ("dir path: " + dirPath);
+    if (fs.existsSync(dirPath)) {
+
+      fs.readdir(dirPath, (error, fileNames) => {
+          if (err) {
+              dialog.showMessageBox({
+                message: error,
+                type: 'error'
+              });
+
+              return;
+          }
+
+          console.log(fileNames);
+          const mediaFilePaths = fileNames
+
+              .filter(fileName => {
+                return fileName.match(supported_format_regex);
+              })
+              .map(fileName => {
+                return {
+                  id: uuid.v1(),
+                  name: fileName,
+                  path: `${dirPath}/${fileName}`
+                };
+              });
+
+          console.log(mediaFilePaths);
+          win.webContents.send('media-directory', mediaFilePaths);
+          })
+    } else {
+        alert('directory not found')
+    } //end if
+
+  } catch (err) {
+    console.error(err)
+  }
+
 });

@@ -1,0 +1,13 @@
+{
+    "library" : {
+        "path" : ""
+    },
+
+    "player" : {
+        "volume" : "0.5",
+        "equalizer": ""
+    },
+    "dev": {
+        "devtools" : "on-load"
+    }
+}

@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld(
       let validChannels = [
         'browse-directory',
         'select-file',
+        'select-dir',
       ];
       if (validChannels.includes(channel)) {
         ipcRenderer.send(channel, data);

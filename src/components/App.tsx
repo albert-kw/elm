@@ -4,9 +4,15 @@ import '../styles/app.less';
 import { MediaFilePath } from '../types/types';
 import ElmMediaList from './ElmMediaList';
 
-const App: FunctionComponent = () => { 
+
+const config = require ('./data/config.json');
+
+
+//import config from '../components/data/config';
+
+const App: FunctionComponent = () => {
   const [mediaUrl, setMediaUrl] = useState('')
-  const [mediaFilePaths, setMediaFilePaths] = useState<MediaFilePath[]>()
+  const [mediaFilePaths, setMediaFilePaths] = useState<MediaFilePath[]>();
 
   useEffect(() => {
     // @ts-ignore
@@ -14,10 +20,24 @@ const App: FunctionComponent = () => {
       setMediaUrl(mediaUrl)
     })
 
+    console.log (config);
+
+    if (config && config.library.path) {
+      console.log("loading media files from %s", config.library.path);
+
+      // @ts-ignore
+      window.api.send('select-dir', config.library.path);
+
+    } else {
+      console.warn("no library path in configuration")
+
+    } //end if
+
     // @ts-ignore
     window.api.receive('media-directory', (mediaFilePaths: MediaFilePath[]) => {
       setMediaFilePaths(mediaFilePaths)
     })
+
   })
 
   const handleSelectFile = (path: string): void => {
