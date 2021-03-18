@@ -1,13 +1,22 @@
 {
+    "general" : {
+        "file_encoding" : "UTF-8"
+    },
+    "viewer": {
+        "visualizer": "false",
+        "properties": "false",
+        "album_art": "false"
+    },
     "library" : {
         "path" : ""
     },
-
     "player" : {
         "volume" : "0.5",
-        "equalizer": ""
+        "equalizer": "",
+        "repeat": "off",
+        "shuffle": "off"
     },
-    "dev": {
+    "_DEV_": {
         "devtools" : "on-load"
     }
 }
