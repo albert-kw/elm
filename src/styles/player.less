@@ -35,6 +35,19 @@
     left: -6px;
     top: 8px;
     z-index: 2;
+    pointer-events: none;
+  }
+
+  .pin-dragging {
+    border-radius: 20px;
+    height: 12px;
+    width: 12px;
+    background-color: rgb(235, 235, 235);
+    position: absolute;
+    left: -6px;
+    top: 8px;
+    z-index: 2;
+    pointer-events: none;
   }
 
   .seeker-bar {
@@ -44,6 +57,7 @@
     border-radius: 10px;
     overflow: hidden;
     position: relative;
+    pointer-events: none;
 
     .buffered {
       height: 100%;
