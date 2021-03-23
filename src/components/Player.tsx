@@ -13,6 +13,8 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [bufferedRanges, setBufferedRanges] = useState<BufferedRange[]>()
+  const [isDragging, setDragging] = useState(false)
+  const seekerBarElement = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (audioElement?.current?.src) {
@@ -81,10 +83,38 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
       return
     }
 
+    if (isPlaying) {
+      audioElement.current.pause()
+    }
+
+    setDragging(true)
+
     const barElement = e.target as HTMLDivElement
-    const positionOnBar = e.clientX - barElement.offsetLeft
-    const selectedPosition = positionOnBar / barElement.clientWidth
+    let positionOnBar = e.clientX - barElement.offsetLeft
+    let selectedPosition = positionOnBar / barElement.clientWidth
     audioElement.current.currentTime = selectedPosition * audioElement.current.duration
+
+    const dragMove = (e: MouseEvent): void => {
+      positionOnBar = e.clientX - barElement.offsetLeft
+      selectedPosition = positionOnBar / barElement.clientWidth
+      audioElement.current.currentTime = selectedPosition * audioElement.current.duration
+    }
+
+    const stopDragMove = (): void => {
+      document.onmouseup = null
+      document.onmousemove = null
+      setDragging(false)
+      if (isPlaying) {
+        audioElement.current.play()
+      }
+    }
+
+    const mouseDownDrag = (e: React.MouseEvent<HTMLDivElement, MouseEvent>): void => {
+      document.onmousemove = dragMove
+      document.onmouseup = stopDragMove
+    }
+
+    mouseDownDrag(e)
   }
 
   return (
@@ -98,7 +128,7 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
       )}
       <div className="player-controls">
         <div className="seeker-bar-container" onMouseDown={handleChangeTime}>
-          <div className="seeker-bar">
+          <div className="seeker-bar" ref={seekerBarElement}>
             {bufferedRanges?.map(range => {
               return (
                 <div
@@ -118,9 +148,16 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
               }}
             />
           </div>
-          <div className="pin" style={{
-            left: currentTime ? `calc(${(currentTime / duration) * 100}% - 6px)` : '-6px'
-          }}/>
+          {!isDragging && (
+            <div className="pin" style={{
+              left: currentTime ? `calc(${(currentTime / duration) * 100}% - 6px)` : '-6px',
+            }}/>
+          )}
+          {isDragging && (
+            <div className="pin-dragging" style={{
+              left: currentTime ? `calc(${(currentTime / duration) * 100}% - 6px)` : '-6px',
+            }}/>
+          )}
         </div>
         <div className="control-buttons">
           <button disabled={!mediaUrl} onClick={togglePlay}>
