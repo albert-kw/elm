@@ -2,6 +2,8 @@ import React, { useState, FunctionComponent, useRef, useEffect } from 'react';
 import '../styles/player.less';
 import { BufferedRange } from '../types/types';
 import * as uuid from 'uuid'
+import IconButton from './IconButton';
+import { PAUSE_CIRCLE, PLAY_CIRCLE, STEP_BACKWARD, STEP_FORWARD } from './assets/svgIcons';
 
 interface PlayerProps {
   mediaUrl: string
@@ -160,12 +162,16 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
           )}
         </div>
         <div className="control-buttons">
-          <button disabled={!mediaUrl} onClick={togglePlay}>
-            {isPlaying ? 'Pause' : 'Play'}
-          </button>
-          <button disabled={!mediaUrl} onClick={stopPlaying}>Stop</button>
-          <button disabled={!mediaUrl}>Previous</button>
-          <button disabled={!mediaUrl}>Next</button>
+          <IconButton size={22} disabled={!mediaUrl}>
+            {STEP_BACKWARD}
+          </IconButton>
+          <IconButton size={45} onClick={togglePlay} disabled={!mediaUrl}>
+            {isPlaying ? PAUSE_CIRCLE : PLAY_CIRCLE}
+          </IconButton>
+          {/* <button disabled={!mediaUrl} onClick={stopPlaying}>Stop</button> */}
+          <IconButton size={22} disabled={!mediaUrl}>
+            {STEP_FORWARD}
+          </IconButton>
         </div>
       </div>
     </>
