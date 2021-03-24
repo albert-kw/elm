@@ -12,24 +12,13 @@ interface PlayerProps {
 const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const audioElement = useRef<HTMLMediaElement>(null)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
   const [bufferedRanges, setBufferedRanges] = useState<BufferedRange[]>()
   const [isDragging, setDragging] = useState(false)
-  const seekerBarElement = useRef<HTMLDivElement>(null)
+  const barProgressElement = useRef<HTMLDivElement>(null)
+  const progressPinElement = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (audioElement?.current?.src) {
-      setDuration(audioElement.current.duration)
-    }
-  })
-
-  useEffect(() => {
-    if (audioElement?.current?.src) {
-      setDuration(audioElement.current.duration)
-    }
-    setIsPlaying(false)
-    setCurrentTime(0)
+    stopPlaying()
   }, [mediaUrl])
 
   const togglePlay = (): void => {
@@ -51,12 +40,21 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
     }
     audioElement.current['pause']()
     audioElement.current['currentTime'] = 0
+    barProgressElement.current.style.width = '0%'
+    progressPinElement.current.style.left = '0%'
     setIsPlaying(false)
   }
 
   const updateCurrentTime = (e: React.SyntheticEvent<HTMLAudioElement, Event>): void => {
+    if (isDragging) {
+      return
+    }
+
     const target = e.target as HTMLAudioElement
-    setCurrentTime(target.currentTime)
+    const duration = audioElement.current.duration
+
+    barProgressElement.current.style.width = `${(target.currentTime / duration) * 100}%`
+    progressPinElement.current.style.left = `calc(${(target.currentTime / duration) * 100}% - 6px)`
 
     if (audioElement?.current) {
       const audioBuffered = audioElement.current.buffered
@@ -85,30 +83,46 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
       return
     }
 
-    if (isPlaying) {
-      audioElement.current.pause()
-    }
-
     setDragging(true)
 
     const barElement = e.target as HTMLDivElement
     let positionOnBar = e.clientX - barElement.offsetLeft
     let selectedPosition = positionOnBar / barElement.clientWidth
-    audioElement.current.currentTime = selectedPosition * audioElement.current.duration
+    let selectedPositionPercent
+    if (selectedPosition > 0 && selectedPosition < 1) {
+      selectedPositionPercent = selectedPosition * 100
+    } else if (selectedPosition <= 0) {
+      selectedPositionPercent = 0
+    } else {
+      selectedPositionPercent = 100
+    }
+
+    barProgressElement.current.style.width = `${selectedPositionPercent}%`
+    progressPinElement.current.style.left = `calc(${selectedPositionPercent}% - 6px)`
+    progressPinElement.current.style.opacity = '1'
 
     const dragMove = (e: MouseEvent): void => {
       positionOnBar = e.clientX - barElement.offsetLeft
       selectedPosition = positionOnBar / barElement.clientWidth
-      audioElement.current.currentTime = selectedPosition * audioElement.current.duration
+      if (selectedPosition > 0 && selectedPosition < 1) {
+        selectedPositionPercent = selectedPosition * 100
+      } else if (selectedPosition <= 0) {
+        selectedPositionPercent = 0
+      } else {
+        selectedPositionPercent = 100
+      }
+
+      barProgressElement.current.style.width = `${selectedPositionPercent}%`
+      progressPinElement.current.style.left = `calc(${selectedPositionPercent}% - 6px)`
+      progressPinElement.current.style.opacity = '1'
     }
 
     const stopDragMove = (): void => {
       document.onmouseup = null
       document.onmousemove = null
+      progressPinElement.current.style.opacity = '0'
+      audioElement.current.currentTime = audioElement.current.duration * selectedPosition
       setDragging(false)
-      if (isPlaying) {
-        audioElement.current.play()
-      }
     }
 
     const mouseDownDrag = (e: React.MouseEvent<HTMLDivElement, MouseEvent>): void => {
@@ -130,8 +144,15 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
       )}
       <div className="player-controls">
         <div className="seeker-bar-container" onMouseDown={handleChangeTime}>
-          <div className="seeker-bar" ref={seekerBarElement}>
+          <div className="seeker-bar">
             {bufferedRanges?.map(range => {
+              if (!audioElement.current) {
+                return
+              }
+              const duration = audioElement.current.duration
+              if (!duration) {
+                return
+              }
               return (
                 <div
                   className="buffered"
@@ -145,21 +166,11 @@ const Player: FunctionComponent<PlayerProps> = ({mediaUrl}) => {
             })}
             <div
               className="progress"
-              style={{
-                width: currentTime ? `${(currentTime / duration) * 100}%` : '0'
-              }}
+              ref={barProgressElement}
             />
           </div>
-          {!isDragging && (
-            <div className="pin" style={{
-              left: currentTime ? `calc(${(currentTime / duration) * 100}% - 6px)` : '-6px',
-            }}/>
-          )}
-          {isDragging && (
-            <div className="pin-dragging" style={{
-              left: currentTime ? `calc(${(currentTime / duration) * 100}% - 6px)` : '-6px',
-            }}/>
-          )}
+          <div className="pin" ref={progressPinElement} />
+          
         </div>
         <div className="control-buttons">
           <IconButton size={22} disabled={!mediaUrl}>
